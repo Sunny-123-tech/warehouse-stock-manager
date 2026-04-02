@@ -4,7 +4,7 @@ const path = require('path');
 const stockRoutes = require('./routes/stock');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // ✅ FIXED
 
 app.use(cors());
 app.use(express.json());
@@ -17,5 +17,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
