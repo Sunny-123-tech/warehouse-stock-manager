@@ -88,7 +88,7 @@
             <td>${item.category}</td>
             <td>${item.quantity} ${item.unit}</td>
             <td>${item.location || '-'}</td>
-            <td>${new Date(item.added_on).toLocaleDateString()}</td>
+            <td>${new Date(item.created_on).toLocaleDateString('en-IN')}</td>
           </tr>
         `).join('');
       } catch (err) {
