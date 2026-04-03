@@ -17,11 +17,15 @@ header {
   background-color: #2c3e50;
   color: white;
   padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 header h1 {
   font-size: 22px;
-  margin-bottom: 8px;
 }
 
 nav a {
@@ -34,6 +38,32 @@ nav a {
 nav a:hover {
   color: white;
   text-decoration: underline;
+}
+
+/* Header right (username + logout) */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-right span {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.header-right button {
+  background-color: #c0392b;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.header-right button:hover {
+  background-color: #922b21;
 }
 
 /* Main content */
@@ -268,4 +298,65 @@ button:hover {
 
 .modal-buttons {
   margin-top: 15px;
+}
+
+/* Auth box (login & register pages) */
+.auth-box {
+  max-width: 400px;
+  margin: 60px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-box h2 {
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #2c3e50;
+}
+
+.auth-box input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.auth-box input:focus {
+  outline: none;
+  border-color: #2980b9;
+}
+
+.auth-box button {
+  padding: 10px;
+  background: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.auth-box button:hover {
+  background-color: #1a252f;
+}
+
+.auth-box p {
+  font-size: 13px;
+  color: #555;
+  text-align: center;
+}
+
+.auth-box a {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.auth-box a:hover {
+  text-decoration: underline;
 }

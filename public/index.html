@@ -15,6 +15,10 @@
       <a href="add.html">Add Item</a>
       <a href="stock.html">View Stock</a>
     </nav>
+    <div class="header-right">
+      <span id="username"></span>
+      <button onclick="logout()">Logout</button>
+    </div>
   </header>
 
   <main>
@@ -59,6 +63,22 @@
   </main>
 
   <script>
+    // Check login
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
+
+    // Show username
+    const name = localStorage.getItem('name');
+    if (name) document.getElementById('username').textContent = 'Welcome, ' + name;
+
+    // Logout
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('name');
+      window.location.href = 'login.html';
+    }
+
     async function loadDashboard() {
       try {
         const res = await fetch('/api/stock');

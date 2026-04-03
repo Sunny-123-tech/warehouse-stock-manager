@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - Warehouse Stock Manager</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header>
+    <h1>Warehouse Stock Manager</h1>
+  </header>
+  <main>
+    <div class="auth-box">
+      <h2>Register</h2>
+      <input type="text" id="name" placeholder="Full Name" />
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="register()">Register</button>
+      <p id="msg" style="color:red"></p>
+      <p>Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+  </main>
+  <script>
+    async function register() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('msg').style.color = 'green';
+        document.getElementById('msg').textContent = 'Registered! Redirecting to login...';
+        setTimeout(() => window.location.href = 'login.html', 1500);
+      } else {
+        document.getElementById('msg').textContent = data.error;
+      }
+    }
+  </script>
+</body>
+</html>
