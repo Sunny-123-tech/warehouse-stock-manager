@@ -3,12 +3,9 @@ const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
-// Test connection
 pool.connect()
   .then(() => console.log("Connected to PostgreSQL ✅"))
   .catch(err => {
@@ -16,10 +13,10 @@ pool.connect()
     process.exit(1);
   });
 
-// Auto create table
 const createTableQuery = `
 CREATE TABLE IF NOT EXISTS stock (
   id SERIAL PRIMARY KEY,
+  user_id INTEGER,
   name VARCHAR(255),
   category VARCHAR(255),
   quantity INTEGER,
@@ -29,6 +26,8 @@ CREATE TABLE IF NOT EXISTS stock (
   created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE stock ADD COLUMN IF NOT EXISTS user_id INTEGER;
 `;
 
 pool.query(createTableQuery)

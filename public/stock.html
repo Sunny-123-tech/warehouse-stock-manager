@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <header>
     <h1>Warehouse Stock Manager</h1>
     <nav>
@@ -16,17 +15,13 @@
       <a href="stock.html">View Stock</a>
     </nav>
   </header>
-
   <main>
     <h2>Stock List</h2>
-
     <div id="msg" class="msg hidden"></div>
-
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Search by name or category..." oninput="filterItems()" />
       <button onclick="loadStock()">Refresh</button>
     </div>
-
     <table id="stockTable">
       <thead>
         <tr>
@@ -48,9 +43,7 @@
     <div id="editModal" class="modal hidden">
       <div class="modal-box">
         <h3>Edit Item</h3>
-
         <input type="hidden" id="editId" />
-
         <div class="form-group">
           <label>Item Name</label>
           <input type="text" id="editName" />
@@ -82,22 +75,33 @@
           <label>Description</label>
           <textarea id="editDescription" rows="2"></textarea>
         </div>
-
         <div class="modal-buttons">
           <button onclick="saveEdit()">Save</button>
           <button class="cancel-btn" onclick="closeModal()">Cancel</button>
         </div>
       </div>
     </div>
-
   </main>
 
   <script>
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
+
     let allItems = [];
 
     async function loadStock() {
+      const token = localStorage.getItem('token');
       try {
-        const res = await fetch('/api/stock');
+        const res = await fetch('/api/stock', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (res.status === 401) {
+          window.location.href = 'login.html';
+          return;
+        }
+
         allItems = await res.json();
         renderTable(allItems);
       } catch (err) {
@@ -140,7 +144,6 @@
     function openEdit(id) {
       const item = allItems.find(i => i.id === id);
       if (!item) return;
-
       document.getElementById('editId').value = item.id;
       document.getElementById('editName').value = item.name;
       document.getElementById('editCategory').value = item.category;
@@ -148,7 +151,6 @@
       document.getElementById('editUnit').value = item.unit;
       document.getElementById('editLocation').value = item.location || '';
       document.getElementById('editDescription').value = item.description || '';
-
       document.getElementById('editModal').classList.remove('hidden');
     }
 
@@ -157,6 +159,7 @@
     }
 
     async function saveEdit() {
+      const token = localStorage.getItem('token');
       const id = document.getElementById('editId').value;
       const body = {
         name: document.getElementById('editName').value,
@@ -170,7 +173,10 @@
       try {
         const res = await fetch(`/api/stock/${id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
           body: JSON.stringify(body)
         });
         const data = await res.json();
@@ -188,9 +194,12 @@
 
     async function deleteItem(id) {
       if (!confirm('Are you sure you want to delete this item?')) return;
-
+      const token = localStorage.getItem('token');
       try {
-        const res = await fetch(`/api/stock/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/stock/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
         const data = await res.json();
         if (res.ok) {
           showMsg('Item deleted.', 'success');

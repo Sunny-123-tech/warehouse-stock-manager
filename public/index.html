@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <header>
     <h1>Warehouse Stock Manager</h1>
     <nav>
@@ -20,11 +19,9 @@
       <button onclick="logout()">Logout</button>
     </div>
   </header>
-
   <main>
     <h2>Dashboard</h2>
     <p>Welcome to the Warehouse Stock Manager. Use the menu above to manage your stock.</p>
-
     <div class="stats-row">
       <div class="stat-box">
         <h3>Total Items</h3>
@@ -43,7 +40,6 @@
         <p id="lowStock">--</p>
       </div>
     </div>
-
     <h2>Recent Entries</h2>
     <table id="recentTable">
       <thead>
@@ -61,18 +57,14 @@
       </tbody>
     </table>
   </main>
-
   <script>
-    // Check login
     if (!localStorage.getItem('token')) {
       window.location.href = 'login.html';
     }
 
-    // Show username
     const name = localStorage.getItem('name');
     if (name) document.getElementById('username').textContent = 'Welcome, ' + name;
 
-    // Logout
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('name');
@@ -80,18 +72,24 @@
     }
 
     async function loadDashboard() {
+      const token = localStorage.getItem('token');
       try {
-        const res = await fetch('/api/stock');
+        const res = await fetch('/api/stock', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (res.status === 401) {
+          window.location.href = 'login.html';
+          return;
+        }
+
         const items = await res.json();
 
         document.getElementById('totalItems').textContent = items.length;
-
         const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
         document.getElementById('totalQty').textContent = totalQty;
-
         const cats = new Set(items.map(i => i.category));
         document.getElementById('totalCategories').textContent = cats.size;
-
         const low = items.filter(i => i.quantity < 5).length;
         document.getElementById('lowStock').textContent = low;
 
