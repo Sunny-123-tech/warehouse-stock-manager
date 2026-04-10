@@ -34,22 +34,15 @@
     </div>
   </main>
   <script>
+    const API = 'https://warehouse-stock-manager.onrender.com';
+
     function validateName() {
       const val = document.getElementById('name').value.trim();
       const err = document.getElementById('nameErr');
-      if (!val) {
-        err.textContent = 'Full name is required.';
-        return false;
-      } else if (/\d/.test(val)) {
-        err.textContent = 'Name cannot contain numbers.';
-        return false;
-      } else if (!/^[A-Za-z\s.\-']+$/.test(val)) {
-        err.textContent = 'Name can only contain letters, spaces, or hyphens.';
-        return false;
-      } else if (val.length < 2) {
-        err.textContent = 'Name must be at least 2 characters.';
-        return false;
-      }
+      if (!val) { err.textContent = 'Full name is required.'; return false; }
+      if (/\d/.test(val)) { err.textContent = 'Name cannot contain numbers.'; return false; }
+      if (!/^[A-Za-z\s.\-']+$/.test(val)) { err.textContent = 'Name can only contain letters, spaces, or hyphens.'; return false; }
+      if (val.length < 2) { err.textContent = 'Name must be at least 2 characters.'; return false; }
       err.textContent = '';
       return true;
     }
@@ -57,13 +50,8 @@
     function validateEmail() {
       const val = document.getElementById('email').value.trim();
       const err = document.getElementById('emailErr');
-      if (!val) {
-        err.textContent = 'Email is required.';
-        return false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-        err.textContent = 'Enter a valid email address.';
-        return false;
-      }
+      if (!val) { err.textContent = 'Email is required.'; return false; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { err.textContent = 'Enter a valid email address.'; return false; }
       err.textContent = '';
       return true;
     }
@@ -71,28 +59,18 @@
     function validatePassword() {
       const val = document.getElementById('password').value;
       const err = document.getElementById('passwordErr');
-      if (!val) {
-        err.textContent = 'Password is required.';
-        return false;
-      } else if (val.length < 6) {
-        err.textContent = 'Password must be at least 6 characters.';
-        return false;
-      }
+      if (!val) { err.textContent = 'Password is required.'; return false; }
+      if (val.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return false; }
       err.textContent = '';
       return true;
     }
 
     async function register() {
-      const okName = validateName();
-      const okEmail = validateEmail();
-      const okPass = validatePassword();
-      if (!okName || !okEmail || !okPass) return;
-
+      if (!validateName() || !validateEmail() || !validatePassword()) return;
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(`${API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })

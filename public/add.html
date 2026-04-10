@@ -19,45 +19,22 @@
     <h2>Add New Item</h2>
     <div id="msg" class="msg hidden"></div>
     <div class="form-container">
-      <div class="form-group">
-        <label for="name">Item Name *</label>
-        <input type="text" id="name" placeholder="e.g. Steel Bolts" />
-      </div>
-      <div class="form-group">
-        <label for="category">Category *</label>
-        <input type="text" id="category" placeholder="e.g. Hardware, Electronics" />
-      </div>
-      <div class="form-group">
-        <label for="quantity">Quantity *</label>
-        <input type="number" id="quantity" min="0" placeholder="e.g. 100" />
-      </div>
-      <div class="form-group">
-        <label for="unit">Unit</label>
+      <div class="form-group"><label for="name">Item Name *</label><input type="text" id="name" placeholder="e.g. Steel Bolts" /></div>
+      <div class="form-group"><label for="category">Category *</label><input type="text" id="category" placeholder="e.g. Hardware, Electronics" /></div>
+      <div class="form-group"><label for="quantity">Quantity *</label><input type="number" id="quantity" min="0" placeholder="e.g. 100" /></div>
+      <div class="form-group"><label for="unit">Unit</label>
         <select id="unit">
-          <option value="pcs">pcs (pieces)</option>
-          <option value="kg">kg</option>
-          <option value="litre">litre</option>
-          <option value="box">box</option>
-          <option value="roll">roll</option>
-          <option value="metre">metre</option>
+          <option value="pcs">pcs (pieces)</option><option value="kg">kg</option><option value="litre">litre</option><option value="box">box</option><option value="roll">roll</option><option value="metre">metre</option>
         </select>
       </div>
-      <div class="form-group">
-        <label for="location">Storage Location</label>
-        <input type="text" id="location" placeholder="e.g. Rack A3, Shelf 2" />
-      </div>
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea id="description" rows="3" placeholder="Optional notes..."></textarea>
-      </div>
+      <div class="form-group"><label for="location">Storage Location</label><input type="text" id="location" placeholder="e.g. Rack A3, Shelf 2" /></div>
+      <div class="form-group"><label for="description">Description</label><textarea id="description" rows="3" placeholder="Optional notes..."></textarea></div>
       <button onclick="addItem()">Add Item</button>
     </div>
   </main>
   <script>
-    if (!localStorage.getItem('token')) {
-      window.location.href = 'login.html';
-    }
-
+    const API = 'https://warehouse-stock-manager.onrender.com';
+    if (!localStorage.getItem('token')) window.location.href = 'login.html';
     async function addItem() {
       const token = localStorage.getItem('token');
       const name = document.getElementById('name').value.trim();
@@ -66,48 +43,22 @@
       const unit = document.getElementById('unit').value;
       const location = document.getElementById('location').value.trim();
       const description = document.getElementById('description').value.trim();
-
-      if (!name || !category || quantity === '') {
-        showMsg('Please fill in Name, Category and Quantity.', 'error');
-        return;
-      }
-
+      if (!name || !category || quantity === '') { showMsg('Please fill in Name, Category and Quantity.', 'error'); return; }
       try {
-        const res = await fetch('/api/stock', {
+        const res = await fetch(`${API}/api/stock`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
           body: JSON.stringify({ name, category, quantity, unit, location, description })
         });
-
         const data = await res.json();
-
-        if (res.status === 401) {
-          window.location.href = 'login.html';
-          return;
-        }
-
-        if (res.ok) {
-          showMsg('Item added successfully!', 'success');
-          clearForm();
-        } else {
-          showMsg(data.error || 'Failed to add item.', 'error');
-        }
-      } catch (err) {
-        showMsg('Server error. Is the server running?', 'error');
-      }
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
+        if (res.ok) { showMsg('Item added successfully!', 'success'); clearForm(); }
+        else showMsg(data.error || 'Failed to add item.', 'error');
+      } catch(err) { showMsg('Server error.', 'error'); }
     }
-
     function clearForm() {
-      document.getElementById('name').value = '';
-      document.getElementById('category').value = '';
-      document.getElementById('quantity').value = '';
-      document.getElementById('location').value = '';
-      document.getElementById('description').value = '';
+      ['name','category','quantity','location','description'].forEach(id => document.getElementById(id).value = '');
     }
-
     function showMsg(text, type) {
       const el = document.getElementById('msg');
       el.textContent = text;

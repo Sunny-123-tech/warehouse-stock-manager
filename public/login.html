@@ -22,9 +22,9 @@
   <main>
     <div class="auth-box">
       <h2>Login</h2>
-      <input type="email" id="email" placeholder="Email" oninput="clearErr('emailErr')" />
+      <input type="email" id="email" placeholder="Email" oninput="validateEmail()" />
       <span class="field-error" id="emailErr"></span>
-      <input type="password" id="password" placeholder="Password" oninput="clearErr('passwordErr')" />
+      <input type="password" id="password" placeholder="Password" oninput="validatePassword()" />
       <span class="field-error" id="passwordErr"></span>
       <button onclick="login()">Login</button>
       <p id="msg" style="color:red"></p>
@@ -32,42 +32,34 @@
     </div>
   </main>
   <script>
+    const API = 'https://warehouse-stock-manager.onrender.com';
+
     if (localStorage.getItem('token')) {
       window.location.href = 'index.html';
     }
 
-    function clearErr(id) {
-      document.getElementById(id).textContent = '';
+    function validateEmail() {
+      const val = document.getElementById('email').value.trim();
+      const err = document.getElementById('emailErr');
+      if (!val) { err.textContent = 'Email is required.'; return false; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { err.textContent = 'Enter a valid email address.'; return false; }
+      err.textContent = '';
+      return true;
     }
 
-    function validate() {
-      let valid = true;
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-      if (!email) {
-        document.getElementById('emailErr').textContent = 'Email is required.';
-        valid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        document.getElementById('emailErr').textContent = 'Enter a valid email address.';
-        valid = false;
-      }
-
-      if (!password) {
-        document.getElementById('passwordErr').textContent = 'Password is required.';
-        valid = false;
-      }
-
-      return valid;
+    function validatePassword() {
+      const val = document.getElementById('password').value;
+      const err = document.getElementById('passwordErr');
+      if (!val) { err.textContent = 'Password is required.'; return false; }
+      err.textContent = '';
+      return true;
     }
 
     async function login() {
-      if (!validate()) return;
-
-      const email = document.getElementById('email').value.trim();
+      if (!validateEmail() || !validatePassword()) return;
+      const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

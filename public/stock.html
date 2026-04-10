@@ -23,58 +23,21 @@
       <button onclick="loadStock()">Refresh</button>
     </div>
     <table id="stockTable">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Quantity</th>
-          <th>Unit</th>
-          <th>Location</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="stockBody">
-        <tr><td colspan="7">Loading...</td></tr>
-      </tbody>
+      <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Quantity</th><th>Unit</th><th>Location</th><th>Actions</th></tr></thead>
+      <tbody id="stockBody"><tr><td colspan="7">Loading...</td></tr></tbody>
     </table>
-
-    <!-- Edit Modal -->
     <div id="editModal" class="modal hidden">
       <div class="modal-box">
         <h3>Edit Item</h3>
         <input type="hidden" id="editId" />
-        <div class="form-group">
-          <label>Item Name</label>
-          <input type="text" id="editName" />
+        <div class="form-group"><label>Item Name</label><input type="text" id="editName" /></div>
+        <div class="form-group"><label>Category</label><input type="text" id="editCategory" /></div>
+        <div class="form-group"><label>Quantity</label><input type="number" id="editQuantity" min="0" /></div>
+        <div class="form-group"><label>Unit</label>
+          <select id="editUnit"><option value="pcs">pcs</option><option value="kg">kg</option><option value="litre">litre</option><option value="box">box</option><option value="roll">roll</option><option value="metre">metre</option></select>
         </div>
-        <div class="form-group">
-          <label>Category</label>
-          <input type="text" id="editCategory" />
-        </div>
-        <div class="form-group">
-          <label>Quantity</label>
-          <input type="number" id="editQuantity" min="0" />
-        </div>
-        <div class="form-group">
-          <label>Unit</label>
-          <select id="editUnit">
-            <option value="pcs">pcs</option>
-            <option value="kg">kg</option>
-            <option value="litre">litre</option>
-            <option value="box">box</option>
-            <option value="roll">roll</option>
-            <option value="metre">metre</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Location</label>
-          <input type="text" id="editLocation" />
-        </div>
-        <div class="form-group">
-          <label>Description</label>
-          <textarea id="editDescription" rows="2"></textarea>
-        </div>
+        <div class="form-group"><label>Location</label><input type="text" id="editLocation" /></div>
+        <div class="form-group"><label>Description</label><textarea id="editDescription" rows="2"></textarea></div>
         <div class="modal-buttons">
           <button onclick="saveEdit()">Save</button>
           <button class="cancel-btn" onclick="closeModal()">Cancel</button>
@@ -82,143 +45,67 @@
       </div>
     </div>
   </main>
-
   <script>
-    if (!localStorage.getItem('token')) {
-      window.location.href = 'login.html';
-    }
-
+    const API = 'https://warehouse-stock-manager.onrender.com';
+    if (!localStorage.getItem('token')) window.location.href = 'login.html';
     let allItems = [];
-
     async function loadStock() {
       const token = localStorage.getItem('token');
       try {
-        const res = await fetch('/api/stock', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-
-        if (res.status === 401) {
-          window.location.href = 'login.html';
-          return;
-        }
-
+        const res = await fetch(`${API}/api/stock`, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
         allItems = await res.json();
         renderTable(allItems);
-      } catch (err) {
-        document.getElementById('stockBody').innerHTML =
-          '<tr><td colspan="7">Error loading data. Is the server running?</td></tr>';
-      }
+      } catch(err) { document.getElementById('stockBody').innerHTML = '<tr><td colspan="7">Error loading data.</td></tr>'; }
     }
-
     function renderTable(items) {
       const tbody = document.getElementById('stockBody');
-      if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">No items found.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = items.map(item => `
-        <tr class="${item.quantity < 5 ? 'low-row' : ''}">
-          <td>${item.id}</td>
-          <td>${item.name}</td>
-          <td>${item.category}</td>
-          <td>${item.quantity}</td>
-          <td>${item.unit}</td>
-          <td>${item.location || '-'}</td>
-          <td>
-            <button class="edit-btn" onclick="openEdit(${item.id})">Edit</button>
-            <button class="delete-btn" onclick="deleteItem(${item.id})">Delete</button>
-          </td>
-        </tr>
-      `).join('');
+      if (!items.length) { tbody.innerHTML = '<tr><td colspan="7">No items found.</td></tr>'; return; }
+      tbody.innerHTML = items.map(item=>`<tr class="${item.quantity<5?'low-row':''}"><td>${item.id}</td><td>${item.name}</td><td>${item.category}</td><td>${item.quantity}</td><td>${item.unit}</td><td>${item.location||'-'}</td><td><button class="edit-btn" onclick="openEdit(${item.id})">Edit</button><button class="delete-btn" onclick="deleteItem(${item.id})">Delete</button></td></tr>`).join('');
     }
-
     function filterItems() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allItems.filter(i =>
-        i.name.toLowerCase().includes(query) ||
-        i.category.toLowerCase().includes(query)
-      );
-      renderTable(filtered);
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      renderTable(allItems.filter(i=>i.name.toLowerCase().includes(q)||i.category.toLowerCase().includes(q)));
     }
-
     function openEdit(id) {
-      const item = allItems.find(i => i.id === id);
+      const item = allItems.find(i=>i.id===id);
       if (!item) return;
       document.getElementById('editId').value = item.id;
       document.getElementById('editName').value = item.name;
       document.getElementById('editCategory').value = item.category;
       document.getElementById('editQuantity').value = item.quantity;
       document.getElementById('editUnit').value = item.unit;
-      document.getElementById('editLocation').value = item.location || '';
-      document.getElementById('editDescription').value = item.description || '';
+      document.getElementById('editLocation').value = item.location||'';
+      document.getElementById('editDescription').value = item.description||'';
       document.getElementById('editModal').classList.remove('hidden');
     }
-
-    function closeModal() {
-      document.getElementById('editModal').classList.add('hidden');
-    }
-
+    function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
     async function saveEdit() {
       const token = localStorage.getItem('token');
       const id = document.getElementById('editId').value;
-      const body = {
-        name: document.getElementById('editName').value,
-        category: document.getElementById('editCategory').value,
-        quantity: document.getElementById('editQuantity').value,
-        unit: document.getElementById('editUnit').value,
-        location: document.getElementById('editLocation').value,
-        description: document.getElementById('editDescription').value,
-      };
-
+      const body = { name:document.getElementById('editName').value, category:document.getElementById('editCategory').value, quantity:document.getElementById('editQuantity').value, unit:document.getElementById('editUnit').value, location:document.getElementById('editLocation').value, description:document.getElementById('editDescription').value };
       try {
-        const res = await fetch(`/api/stock/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify(body)
-        });
+        const res = await fetch(`${API}/api/stock/${id}`, { method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify(body) });
         const data = await res.json();
-        if (res.ok) {
-          showMsg('Item updated successfully!', 'success');
-          closeModal();
-          loadStock();
-        } else {
-          showMsg(data.error || 'Update failed.', 'error');
-        }
-      } catch (err) {
-        showMsg('Server error.', 'error');
-      }
+        if (res.ok) { showMsg('Item updated!','success'); closeModal(); loadStock(); }
+        else showMsg(data.error||'Update failed.','error');
+      } catch(err) { showMsg('Server error.','error'); }
     }
-
     async function deleteItem(id) {
-      if (!confirm('Are you sure you want to delete this item?')) return;
+      if (!confirm('Delete this item?')) return;
       const token = localStorage.getItem('token');
       try {
-        const res = await fetch(`/api/stock/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+        const res = await fetch(`${API}/api/stock/${id}`, { method:'DELETE', headers:{'Authorization':'Bearer '+token} });
         const data = await res.json();
-        if (res.ok) {
-          showMsg('Item deleted.', 'success');
-          loadStock();
-        } else {
-          showMsg(data.error || 'Delete failed.', 'error');
-        }
-      } catch (err) {
-        showMsg('Server error.', 'error');
-      }
+        if (res.ok) { showMsg('Item deleted.','success'); loadStock(); }
+        else showMsg(data.error||'Delete failed.','error');
+      } catch(err) { showMsg('Server error.','error'); }
     }
-
-    function showMsg(text, type) {
+    function showMsg(text,type) {
       const el = document.getElementById('msg');
-      el.textContent = text;
-      el.className = 'msg ' + type;
-      setTimeout(() => { el.className = 'msg hidden'; }, 3000);
+      el.textContent=text; el.className='msg '+type;
+      setTimeout(()=>{el.className='msg hidden';},3000);
     }
-
     loadStock();
   </script>
 </body>
